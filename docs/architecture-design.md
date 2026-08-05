@@ -31,22 +31,7 @@ I plan to use these AWS services because they meet the assignment requirements a
 # System Flow
 
 ```
-CSV File
-    |
-    v
-Amazon S3
-    |
-    v
-AWS Lambda
-    |
-    v
-Amazon Bedrock
-    |
-    v
-Processed Results
-    |
-    v
-Amazon S3
+CSV File -> Amazon S3 -> AWS Lambda -> Amazon Bedrock -> Processed Results -> Amazon S3
 ```
 
 The CSV file will be uploaded to Amazon S3 and uploading the file will start the Lambda function. Lambda will read the CSV file, send tweets to Amazon Bedrock for classification, create the required output columns, and save the completed CSV back to Amazon S3. CloudWatch will be used to view logs if any errors happen during processing.
