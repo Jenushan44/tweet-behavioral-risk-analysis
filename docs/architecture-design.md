@@ -28,6 +28,10 @@ I plan to use these AWS services because they meet the assignment requirements a
 - Amazon CloudWatch: View logs and errors 
 - AWS IAM: Manage permissions between AWS services 
 
+# Architecture Diagram
+
+![Architecture Diagram](architecture-diagram.png)
+
 # System Flow
 
 ```
@@ -48,6 +52,10 @@ The application will:
 6. Save the completed CSV file.
 
 If the input file contains less than 100 tweets, then all of the available tweets would be processed. The application will also make sure that no more than 10 tweets are processed every second.
+
+# Rate Limiting
+
+The program will process one tweet at a time. After each tweet is sent to Amazon Bedrock, it will wait 0.1 seconds before sending the next one. This keeps the program at a maximum of 10 tweets per second, which follows the assignment requirements.
 
 # Error Handling
 
