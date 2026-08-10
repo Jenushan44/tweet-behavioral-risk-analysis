@@ -1,6 +1,8 @@
 import pandas as pd
 import boto3
 import time
+import random
+from urllib.parse import unquote_plus
 
 s3_client = boto3.client("s3")
 bedrock_client = boto3.client("bedrock-runtime",region_name="us-east-1")
@@ -16,6 +18,7 @@ def classify_tweet(tweet):
 
   for attempt in range(max_attempts):
     try:
+      time.sleep(0.1)
       response = bedrock_client.converse(modelId="amazon.nova-micro-v1:0", messages = [{ "role": "user", "content": [{"text": prompt}]}])
 
       output = response['output']['message']['content'][0]['text'].lower().strip()
@@ -40,13 +43,16 @@ def classify_tweet(tweet):
 
       # Prevents program from waiting after final failed attempt
       if attempt < max_attempts - 1: 
-        time.sleep(0.1)
+        wait_time = (2 ** attempt) + random.uniform(0, 1)
+        time.sleep(wait_time)
 
   return None, None
 
 def lambda_handler(event, context):
+  
+
   bucket_name = event["Records"][0]["s3"]["bucket"]["name"]
-  object_key = event["Records"][0]["s3"]["object"]["key"]
+  object_key = unquote_plus(event["Records"][0]["s3"]["object"]["key"])
   response = s3_client.get_object(Bucket=bucket_name, Key=object_key)
 
   df = pd.read_csv(response["Body"])
@@ -74,7 +80,6 @@ def lambda_handler(event, context):
     alerts.append(tweet_alert_of_risk)
 
     print(tweet_alert_of_risk, tweet_output)
-    time.sleep(0.1)
 
   sample_df['suicide_likelihood'] = classifications 
   sample_df['alert_of_risk'] = alerts
