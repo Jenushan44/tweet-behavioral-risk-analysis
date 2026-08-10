@@ -51,15 +51,15 @@ The application will:
 5. Create the required output columns.
 6. Save the completed CSV file.
 
-If the input file contains less than 100 tweets, then all of the available tweets would be processed. The application will also make sure that no more than 10 tweets are processed every second.
+If the input file contains less than 100 tweets, then all of the available tweets would be processed. The application will also make sure that no more than 10 requests are sent to Amazon Bedrock every second.
 
 # Rate Limiting
 
-The program will process one tweet at a time. After each tweet is sent to Amazon Bedrock, it will wait 0.1 seconds before sending the next one. This will keep the program at a maximum of 10 tweets per second, which follows the assignment requirements.
+Before sending each request to Amazon Bedrock, the program will make sure requests are not being sent too quickly. If a request fails, the program will wait before trying again. The wait time will get longer after each failed attempt, with a small random amount of time added. This is called exponential backoff with jitter.
 
 # Error Handling
 
-If something goes wrong while processing a tweet, the application will retry the request a few times. If the request still fails, the error will be logged and the program will continue processing the remaining tweets instead of stopping the entire program. CloudWatch will be used to help find any errors during testing.
+If a request to Amazon Bedrock fails, the program will try it again up to a few times. It will use exponential backoff with jitter to wait between failed attempts. If the request still does not work, the error will be logged and the program will continue with the remaining tweets. CloudWatch will be used to view the errors during testing.
 
 # Limitations
 
