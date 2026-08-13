@@ -23,8 +23,16 @@ else:
 
 def classify_tweet(tweet): 
   prompt = f"""
-  You are classifying the suicide related risk in a tweet. Classify the tweet into one of these four categories: high risk, potentially likely, neutral, or unlikely. Return only the category and nothing else.
+  You are classifying the suicide related risk in a tweet. Classify the tweet into one of these four categories:
+  - high risk: The tweet clearly shows suicidal thoughts, the intent to die or self-harm.
+  - potentially likely: The tweet shows that there are signs of possible suicidal thinking or serious negative feelings but does not show clear intent to die or self-harm.
+  - neutral: The tweet can mention negative emotions, death or difficult situations but there is not enough evidence to determine suicide-related risk.
+  - unlikely: The tweet does not show any suicide-related risk and is not related to suicidal thoughts or self-harm.
 
+  Only use the text of the tweet to make the classification and do not assume information outside of what is written in the tweet.
+
+  Return only one of these exact values: high risk, potentially likely, neutral, unlikely
+  
   Tweet: {tweet}
   """
 
