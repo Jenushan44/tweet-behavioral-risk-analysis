@@ -43,7 +43,7 @@ def classify_tweet(tweet):
   )
 
   # Takes the classification text from Bedrock and clean its formatting
-  output = response['output']['message']['content'][0]['text'].lower().strip()
+  output = response['output']['message']['content'][0]['text'].lower().strip().strip(".!?,/;:")
 
   valid_output = False 
   allowed_values = ["high risk", "potentially likely", "neutral", "unlikely"]

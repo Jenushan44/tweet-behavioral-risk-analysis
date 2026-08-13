@@ -29,7 +29,7 @@ def classify_tweet(tweet):
       time.sleep(0.1)
       response = bedrock_client.converse(modelId="amazon.nova-micro-v1:0", messages = [{ "role": "user", "content": [{"text": prompt}]}])
 
-      output = response['output']['message']['content'][0]['text'].lower().strip()
+      output = response['output']['message']['content'][0]['text'].lower().strip().strip(".!?,/;:")
 
       allowed_values = ["high risk", "potentially likely", "neutral", "unlikely"]
       alert_of_risk = None
