@@ -4,10 +4,13 @@ import time
 import random
 from urllib.parse import unquote_plus
 
+# Creates an s3 client to interact with Amazon S3
 s3_client = boto3.client("s3")
+# Creates a bedrock client to interact with bedrock
 bedrock_client = boto3.client("bedrock-runtime",region_name="us-east-1")
 
 def classify_tweet(tweet): 
+  # Gives bedrock 3 chances to classify the given tweet
   max_attempts = 3
 
   prompt = f"""
@@ -26,9 +29,11 @@ def classify_tweet(tweet):
 
   for attempt in range(max_attempts):
     try:
+      # Limit the bedrock requests to 10 tweets per second
       time.sleep(0.1)
       response = bedrock_client.converse(modelId="amazon.nova-micro-v1:0", messages = [{ "role": "user", "content": [{"text": prompt}]}])
 
+      # Cleans the output to keep comparisons consistent
       output = response['output']['message']['content'][0]['text'].lower().strip().strip(".!?,/;:")
 
       allowed_values = ["high risk", "potentially likely", "neutral", "unlikely"]
@@ -51,16 +56,21 @@ def classify_tweet(tweet):
 
       # Prevents program from waiting after final failed attempt
       if attempt < max_attempts - 1: 
+        # Increase the retry delay and add randomness to avoid repeating requests at the same time
         wait_time = (2 ** attempt) + random.uniform(0, 1)
         time.sleep(wait_time)
 
   return None, None
 
+# event provides information about the S3 trigger such as the bucket name, file name, and event type
 def lambda_handler(event, context):
   
-
+  # Get the name of the S3 bucket that triggered the Lambda function
   bucket_name = event["Records"][0]["s3"]["bucket"]["name"]
+  # Get the uploaded file name from the S3 event
   object_key = unquote_plus(event["Records"][0]["s3"]["object"]["key"])
+
+  #Fetch the uploaded csv from the S3 bucket
   response = s3_client.get_object(Bucket=bucket_name, Key=object_key)
 
   df = pd.read_csv(response["Body"])
@@ -71,6 +81,7 @@ def lambda_handler(event, context):
   if df.empty: 
     raise ValueError("Table is empty")
 
+  # Randomly select up to 100 tweets to analyze
   row_count = len(df)
 
   if row_count < 100: 
@@ -78,7 +89,10 @@ def lambda_handler(event, context):
   else: 
     sample_df = df.sample(n=100)
 
+  # Stores the sucide risk classification for each tweet
   classifications = []
+
+  # Stores the alert value for each tweet
   alerts = []
 
   for tweet in sample_df["Tweet"]: 
